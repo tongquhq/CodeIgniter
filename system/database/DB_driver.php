@@ -687,6 +687,12 @@ abstract class CI_DB_driver {
 					}
 				}
 
+				// Hack: PHPUnit
+				if (defined('PHPUNIT_FOR_CI'))
+				{
+					throw new Exception('Database error : '.$error['message'], $error['code']);
+				}
+
 				// Display errors
 				return $this->display_error(array('Error Number: '.$error['code'], $error['message'], $sql));
 			}

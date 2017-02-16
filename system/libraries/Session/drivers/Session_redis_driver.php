@@ -60,7 +60,7 @@ class CI_Session_redis_driver extends CI_Session_driver implements SessionHandle
 	 *
 	 * @var	string
 	 */
-	protected $_key_prefix = 'ci_session:';
+	protected $_key_prefix = 'ci_session_id:';
 
 	/**
 	 * Lock key
@@ -180,7 +180,7 @@ class CI_Session_redis_driver extends CI_Session_driver implements SessionHandle
 				: $session_data = '';
 
 			$this->_fingerprint = md5($session_data);
-			return $session_data;
+			return $this->reunserialize_data($session_data);
 		}
 
 		return $this->_fail();
@@ -199,6 +199,9 @@ class CI_Session_redis_driver extends CI_Session_driver implements SessionHandle
 	 */
 	public function write($session_id, $session_data)
 	{
+		// Hack by @ComMouse
+		$session_data = $this->reserialize_data($session_data);
+
 		if ( ! isset($this->_redis, $this->_lock_key))
 		{
 			return $this->_fail();
@@ -391,5 +394,83 @@ class CI_Session_redis_driver extends CI_Session_driver implements SessionHandle
 
 		return TRUE;
 	}
+
+	// Hacked by @ComMouse for compatibility with old Redis driver written by @at15
+
+	protected function reserialize_data($data)
+	{
+		return json_encode($this->sess_unserialize($data));
+	}
+
+	protected function reunserialize_data($data)
+	{
+		return $this->sess_serialize(json_decode($data, true));
+	}
+
+	private function sess_serialize($array, $safe = true) {
+        // the session is passed as reference, even if you dont want it to
+        if( is_null($array) ) $array = [];
+        if( $safe ) $array = unserialize(serialize( $array )) ;
+        $raw = '' ;
+        $line = 0 ;
+        $keys = array_keys( $array ) ;
+        foreach( $keys as $key ) {
+            $value = $array[ $key ] ;
+            $line ++ ;
+            $raw .= $key .'|' ;
+            $raw .= serialize( $value ) ;
+        }
+
+        return $raw;
+    }
+
+	// http://php.net/manual/en/function.session-decode.php
+
+	private function sess_unserialize($session_data) {
+        $method = ini_get("session.serialize_handler");
+        switch ($method) {
+            case "php":
+                return self::unserialize_php($session_data);
+                break;
+            case "php_binary":
+                return self::unserialize_phpbinary($session_data);
+                break;
+            default:
+                throw new Exception("Unsupported session.serialize_handler: " . $method . ". Supported: php, php_binary");
+        }
+    }
+
+    private function unserialize_php($session_data) {
+        $return_data = array();
+        $offset = 0;
+        while ($offset < strlen($session_data)) {
+            if (!strstr(substr($session_data, $offset), "|")) {
+                throw new Exception("invalid data, remaining: " . substr($session_data, $offset));
+            }
+            $pos = strpos($session_data, "|", $offset);
+            $num = $pos - $offset;
+            $varname = substr($session_data, $offset, $num);
+            $offset += $num + 1;
+            $data = unserialize(substr($session_data, $offset));
+            $return_data[$varname] = $data;
+            $offset += strlen(serialize($data));
+        }
+        return $return_data;
+    }
+
+    private function unserialize_phpbinary($session_data) {
+        $return_data = array();
+        $offset = 0;
+        while ($offset < strlen($session_data)) {
+            $num = ord($session_data[$offset]);
+            $offset += 1;
+            $varname = substr($session_data, $offset, $num);
+            $offset += $num;
+            $data = unserialize(substr($session_data, $offset));
+            $return_data[$varname] = $data;
+            $offset += strlen(serialize($data));
+        }
+        return $return_data;
+    }
 
 }
