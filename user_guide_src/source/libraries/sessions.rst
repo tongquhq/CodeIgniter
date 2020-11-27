@@ -471,7 +471,7 @@ Preference         Default         Description
 
 .. note:: The 'cookie_httponly' setting doesn't have an effect on sessions.
 	Instead the HttpOnly parameter is always enabled, for security
-	reasons. Additionaly, the 'cookie_prefix' setting is completely
+	reasons. Additionally, the 'cookie_prefix' setting is completely
 	ignored.
 
 Session Drivers
@@ -757,8 +757,8 @@ when creating a session driver for CodeIgniter:
     <http://php.net/sessionhandlerinterface>`_ interface.
 
     .. note:: You may notice that ``SessionHandlerInterface`` is provided
-    	by PHP since version 5.4.0. CodeIgniter will automatically declare
-    	the same interface if you're running an older PHP version.
+        by PHP since version 5.4.0. CodeIgniter will automatically declare
+        the same interface if you're running an older PHP version.
 
     The link will explain why and how.
 

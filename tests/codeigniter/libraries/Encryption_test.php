@@ -94,10 +94,22 @@ class Encryption_test extends CI_TestCase {
 		}
 
 		// Test default length, it must match the digest size
-		$this->assertEquals(64, strlen($this->encryption->hkdf('foobar', 'sha512')));
+		$hkdf_result = $this->encryption->hkdf('foobar', 'sha512');
+		$this->assertEquals(
+			64,
+			defined('MB_OVERLOAD_STRING')
+				? mb_strlen($hkdf_result, '8bit')
+				: strlen($hkdf_result)
+		);
 
 		// Test maximum length (RFC5869 says that it must be up to 255 times the digest size)
-		$this->assertEquals(12240, strlen($this->encryption->hkdf('foobar', 'sha384', NULL, 48 * 255)));
+		$hkdf_result = $this->encryption->hkdf('foobar', 'sha384', NULL, 48 * 255);
+		$this->assertEquals(
+			12240,
+			defined('MB_OVERLOAD_STRING')
+				? mb_strlen($hkdf_result, '8bit')
+				: strlen($hkdf_result)
+		);
 		$this->assertFalse($this->encryption->hkdf('foobar', 'sha224', NULL, 28 * 255 + 1));
 
 		// CI-specific test for an invalid digest
@@ -139,7 +151,7 @@ class Encryption_test extends CI_TestCase {
 			'hmac_key' => str_repeat("\x0", 16)
 		);
 
-		$this->assertTrue(is_array($this->encryption->__get_params($params)));
+		$this->assertInternalType('array', $this->encryption->__get_params($params));
 
 		$params['base64'] = TRUE;
 		$params['hmac_digest'] = 'sha512';
@@ -245,7 +257,7 @@ class Encryption_test extends CI_TestCase {
 			return $this->markTestSkipped('ext/mcrypt is deprecated since PHP 7.1 and will generate notices here.');
 		}
 
-		$this->assertTrue(is_resource($this->encryption->__driver_get_handle('mcrypt', 'rijndael-128', 'cbc')));
+		$this->assertInternalType('resource', $this->encryption->__driver_get_handle('mcrypt', 'rijndael-128', 'cbc'));
 	}
 
 	// --------------------------------------------------------------------

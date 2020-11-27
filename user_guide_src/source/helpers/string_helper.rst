@@ -127,7 +127,7 @@ The following functions are available:
 	:rtype:	string
 
 	Converts double slashes in a string to a single slash, except those
-	found in URL protocol prefixes (e.g. http&#58;//).
+	found in URL protocol prefixes (e.g. \http://).
 
 	Example::
 
@@ -186,7 +186,7 @@ The following functions are available:
 	:returns:	Reduced string
 	:rtype:	string
 
-	Reduces multiple instances of a particular character occuring directly
+	Reduces multiple instances of a particular character occurring directly
 	after each other. Example::
 
 		$string = "Fred, Bill,, Joe, Jimmy";

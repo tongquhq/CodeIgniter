@@ -119,7 +119,7 @@ escaping of fields may break them.
 
 ::
 
-	$this->db->select('(SELECT SUM(payments.amount) FROM payments WHERE payments.invoice_id=4') AS amount_paid', FALSE);
+	$this->db->select('(SELECT SUM(payments.amount) FROM payments WHERE payments.invoice_id=4) AS amount_paid', FALSE);
 	$query = $this->db->get('mytable');
 
 **$this->db->select_max()**
@@ -199,7 +199,7 @@ query.
 
 If you need a specific type of JOIN you can specify it via the third
 parameter of the function. Options are: left, right, outer, inner, left
-outer, and right outer.
+outer, right outer and full outer.
 
 ::
 
@@ -358,13 +358,14 @@ searches.
 		// WHERE `title` LIKE '%match%' ESCAPE '!' AND  `body` LIKE '%match% ESCAPE '!'
 
 	If you want to control where the wildcard (%) is placed, you can use
-	an optional third argument. Your options are 'before', 'after' and
+	an optional third argument. Your options are 'before', 'after', 'none' and
 	'both' (which is the default).
 
 	::
 
 		$this->db->like('title', 'match', 'before');	// Produces: WHERE `title` LIKE '%match' ESCAPE '!'
 		$this->db->like('title', 'match', 'after');	// Produces: WHERE `title` LIKE 'match%' ESCAPE '!'
+		$this->db->like('title', 'match', 'none');	// Produces: WHERE `title` LIKE 'match' ESCAPE '!'
 		$this->db->like('title', 'match', 'both');	// Produces: WHERE `title` LIKE '%match%' ESCAPE '!'
 
 #. **Associative array method:**
@@ -654,7 +655,7 @@ will be reset (by default it will be--just like $this->db->insert())::
 	// Produces string: INSERT INTO mytable (`title`, `content`) VALUES ('My Title', 'My Content')
 
 The key thing to notice in the above example is that the second query did not
-utlize `$this->db->from()` nor did it pass a table name into the first
+utilize `$this->db->from()` nor did it pass a table name into the first
 parameter. The reason this worked is because the query has not been executed
 using `$this->db->insert()` which resets values or reset directly using
 `$this->db->reset_query()`.
